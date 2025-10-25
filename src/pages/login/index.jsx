@@ -1,35 +1,39 @@
 import React, { useState } from "react";
-import "./index.css"
+import "./index.css";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const { setIsAuthenticated } = useAuth();
+  const { setIsAuthenticated, setUser, setToken } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-       const response = await fetch("http://localhost:8081/api/login", {
-         method: "POST",
-         headers: {
-           "Content-Type": "application/json"
-         },
-         body: JSON.stringify({ email, password })
-       });
-       if (!response.ok) {
-         throw new Error("Network response was not ok");
-       }
-       const data = await response.json();
-       
-       if(data.status === "success"){
-            setIsAuthenticated(true);
-    
-       }
+      const response = await fetch("http://localhost:8081/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+
+      if (data.status === "success") {
+        setIsAuthenticated(true);
+        setUser(data.user);
+        setToken(data.token);
+        navigate("/", { replace: true });
+      }
     } catch (error) {
       console.error("Login failed:", error);
     }
-  }  
+  };
 
   return (
     <div className="form-page">

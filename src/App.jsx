@@ -5,10 +5,10 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./index.css"
 import Login from "./pages/login";
+import Dashboard from "./pages/dashboard";
 
 // Placeholder Login and Dashboard components
 
-const Dashboard = () => <h2>Dashboard (Protected)</h2>;
 
 function App() {
 
