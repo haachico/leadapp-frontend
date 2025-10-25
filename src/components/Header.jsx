@@ -16,12 +16,10 @@ const Header = () => {
       display: "flex",
       alignItems: "center",
       boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-      cursor: "pointer",
         justifyContent: "space-between",
     }}
-    onClick={() => navigate("/")}
   >
-    <h1 style={{ fontSize: "1.3rem", margin: 0, letterSpacing: "1px", fontWeight: 700 }}>
+    <h1 style={{ fontSize: "1.3rem", margin: 0, letterSpacing: "1px", fontWeight: 700 , cursor: "pointer"}} onClick={() => navigate("/")}>
       LeadApp
     </h1>
 
