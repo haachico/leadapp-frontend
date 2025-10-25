@@ -1,9 +1,11 @@
+
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import "./index.css";
 
-const Card = ({ title, value, icon }) => (
-  <div className="dashboard-card">
+const Card = ({ title, value, icon, onClick }) => (
+  <div className="dashboard-card" onClick={onClick} style={{ cursor: "pointer" }}>
     <div className="dashboard-card-icon">{icon}</div>
     <div className="dashboard-card-content">
       <div className="dashboard-card-title">{title}</div>
@@ -12,10 +14,12 @@ const Card = ({ title, value, icon }) => (
   </div>
 );
 
+
 const Dashboard = () => {
   const { user, token } = useAuth();
   const [stats, setStats] = useState({ total_leads: 0, total_customers: 0, total_users: 0 });
   const isAdmin = user?.role === "admin";
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!token) return;
@@ -29,13 +33,17 @@ const Dashboard = () => {
       .catch(() => setStats({ total_leads: 0, total_customers: 0, total_users: 0 }));
   }, [user]);
 
+  const handleCardClick = (type) => {
+    navigate("/view-all", { state: { type } });
+  };
+
   return (
     <div className="dashboard-container">
       {isAdmin && (
-        <Card title="Users" value={stats.total_users} icon={"👤"} />
+        <Card title="Users" value={stats.total_users} icon={"👤"} onClick={() => handleCardClick("users")} />
       )}
-      <Card title="Leads" value={stats.total_leads} icon={"📋"} />
-      <Card title="Customers" value={stats.total_customers} icon={"💼"} />
+      <Card title="Leads" value={stats.total_leads} icon={"📋"} onClick={() => handleCardClick("leads")} />
+      <Card title="Customers" value={stats.total_customers} icon={"💼"} onClick={() => handleCardClick("customers")} />
     </div>
   );
 };

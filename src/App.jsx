@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import "./index.css"
 import Login from "./pages/login";
 import Dashboard from "./pages/dashboard";
+import ViewAll from "./pages/viewAll";
 
 // Placeholder Login and Dashboard components
 
@@ -25,6 +26,7 @@ function App() {
           }
         >
           <Route index element={<Dashboard />} />
+          <Route path="/view-all" element={<ViewAll />} />
           {/* Add more protected routes here */}
         </Route>
       </Routes>
