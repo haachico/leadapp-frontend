@@ -1,11 +1,23 @@
 :root {
+  /* Typography */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
+  /* Color Palette */
+  --primary-color: #646cff;
+  --primary-color-dark: #535bf2;
+  --secondary-color: #22223b;
+  --accent-color: #f9f871;
+  --error-color: #d32f2f;
+  --background-color: #242424;
+  --surface-color: #fff;
+  --text-color: rgba(255, 255, 255, 0.87);
+  --text-color-dark: #213547;
+
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--text-color);
+  background-color: var(--background-color);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -56,8 +68,8 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--text-color-dark);
+    background-color: var(--surface-color);
   }
   a:hover {
     color: #747bff;
