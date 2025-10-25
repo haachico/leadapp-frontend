@@ -1,3 +1,71 @@
+/* Modal styles */
+.viewall-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.viewall-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 2.5rem 2rem 2rem 2rem;
+  min-width: 350px;
+  max-width: 95vw;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1001;
+}
+.viewall-modal h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  color: #222;
+  text-align: center;
+}
+.viewall-modal-form .form-group {
+  margin-bottom: 1.2rem;
+}
+.viewall-modal-form .form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+}
+.viewall-modal-form .form-input {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #f9f9f9;
+  transition: border-color 0.2s;
+  color: #222;
+}
+.viewall-modal-form .form-input:focus {
+  border-color: #646cff;
+  outline: none;
+}
+.viewall-modal-form .form-error {
+  color: #d32f2f;
+  font-size: 0.95rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+.viewall-modal-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
 .viewall-table-header {
   display: flex;
   align-items: center;
