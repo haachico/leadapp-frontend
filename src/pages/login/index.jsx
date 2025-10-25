@@ -27,6 +27,8 @@ const Login = () => {
       if (data.status === "success") {
         setIsAuthenticated(true);
         setUser(data.user);
+        localStorage.setItem("authToken", data.token);
+        localStorage.setItem("authUser", JSON.stringify(data.user));
         setToken(data.token);
         navigate("/", { replace: true });
       }

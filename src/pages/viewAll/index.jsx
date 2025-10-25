@@ -20,8 +20,9 @@ const ViewAll = () => {
     const { user } = useAuth();
 
   const [showModal, setShowModal] = useState(false);
-const [form, setForm] = useState({});
-const [formError, setFormError] = useState("");
+  const [form, setForm] = useState({});
+  const [formError, setFormError] = useState("");
+  const [editRow, setEditRow] = useState(null);
 
 const FORM_FIELDS = {
   users: [
@@ -46,30 +47,49 @@ const FORM_FIELDS = {
 };
 
 const handleOpenModal = () => {
+  setEditRow(null);
   setForm(type === "users" ? { role: "user" } : { assigned_to: user?.id });
   setFormError("");
   setShowModal(true);
 };
+
+const handleOpenEditModal = (row) => {
+  setEditRow(row);
+  // Only include fields shown in table (columns), but skip 'id'
+  const editable = {};
+  Object.keys(row).forEach((key) => {
+    if (columns.includes(key) && key !== "id") editable[key] = row[key];
+  });
+  setForm(editable);
+  setFormError("");
+  setShowModal(true);
+};
+
 const handleCloseModal = () => {
   setShowModal(false);
   setForm({});
   setFormError("");
+  setEditRow(null);
 };
+
 const handleFormChange = (e) => {
   setForm({ ...form, [e.target.name]: e.target.value });
 };
+
 const handleFormSubmit = async (e) => {
   e.preventDefault();
-  for (const field of FORM_FIELDS[type]) {
-    if (field.required && !form[field.name]) {
-      setFormError(`${field.label} is required`);
+  // Only validate fields present in the form (edit: only table fields, skip id)
+  const validateFields = editRow ? columns.filter(f => f !== "id") : FORM_FIELDS[type].map(f=>f.name);
+  for (const field of validateFields) {
+    if (!form[field] && field !== "phone") { // phone is optional
+      setFormError(`${field.replace(/_/g, " ")} is required`);
       return;
     }
   }
   try {
-    const url = API_MAP[type];
+    const url = editRow ? `${API_MAP[type]}/${editRow.id}` : API_MAP[type];
     const res = await fetch(url, {
-      method: "POST",
+      method: editRow ? "PUT" : "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -78,16 +98,16 @@ const handleFormSubmit = async (e) => {
     });
     if (!res.ok) {
       const err = await res.json();
-      setFormError(err.message || "Failed to create.");
+      setFormError(err.message || `Failed to ${editRow ? "update" : "create"}.`);
       return;
     }
     setShowModal(false);
     setForm({});
     setFormError("");
-    // Optionally, refresh data after creation
+    setEditRow(null);
     window.location.reload();
   } catch (err) {
-    setFormError("Failed to create. Please try again.");
+    setFormError(`Failed to ${editRow ? "update" : "create"}. Please try again.`);
   }
 };
 
@@ -137,44 +157,58 @@ useEffect(() => {
       {showModal && (
         <div className="viewall-modal-overlay">
           <div className="viewall-modal">
-            <h3>Create {type.slice(0, -1).charAt(0).toUpperCase() + type.slice(1, -1)}</h3>
+            <h3>{editRow ? `Edit ${type.slice(0, -1).charAt(0).toUpperCase() + type.slice(1, -1)}` : `Create ${type.slice(0, -1).charAt(0).toUpperCase() + type.slice(1, -1)}`}</h3>
             <form onSubmit={handleFormSubmit} className="viewall-modal-form">
-              {FORM_FIELDS[type].map(field =>
-                field.type === "hidden" ? (
-                  <input key={field.name} type="hidden" name={field.name} value={user?.id} />
-                ) : field.type === "select" ? (
-                  <div className="form-group" key={field.name}>
-                    <label className="form-label">{field.label}</label>
-                    <select
-                      name={field.name}
-                      value={form[field.name] || ""}
-                      onChange={handleFormChange}
-                      className="form-input"
-                      required={field.required}
-                    >
-                      <option value="" disabled>Select {field.label}</option>
-                      {field.options.map(opt => (
-                        <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
-                      ))}
-                    </select>
-                  </div>
-                ) : (
-                  <div className="form-group" key={field.name}>
-                    <label className="form-label">{field.label}</label>
-                    <input
-                      type={field.type}
-                      name={field.name}
-                      value={form[field.name] || ""}
-                      onChange={handleFormChange}
-                      className="form-input"
-                      required={field.required}
-                    />
-                  </div>
-                )
-              )}
+              {editRow
+                ? columns.filter(col => col !== "id").map((col) => (
+                    <div className="form-group" key={col}>
+                      <label className="form-label">{col.replace(/_/g, " ").toUpperCase()}</label>
+                      <input
+                        type={col === "email" ? "email" : "text"}
+                        name={col}
+                        value={form[col] || ""}
+                        onChange={handleFormChange}
+                        className="form-input"
+                        required={col !== "phone"}
+                      />
+                    </div>
+                  ))
+                : FORM_FIELDS[type].map(field =>
+                    field.type === "hidden" ? (
+                      <input key={field.name} type="hidden" name={field.name} value={user?.id} />
+                    ) : field.type === "select" ? (
+                      <div className="form-group" key={field.name}>
+                        <label className="form-label">{field.label}</label>
+                        <select
+                          name={field.name}
+                          value={form[field.name] || ""}
+                          onChange={handleFormChange}
+                          className="form-input"
+                          required={field.required}
+                        >
+                          <option value="" disabled>Select {field.label}</option>
+                          {field.options.map(opt => (
+                            <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <div className="form-group" key={field.name}>
+                        <label className="form-label">{field.label}</label>
+                        <input
+                          type={field.type}
+                          name={field.name}
+                          value={form[field.name] || ""}
+                          onChange={handleFormChange}
+                          className="form-input"
+                          required={field.required}
+                        />
+                      </div>
+                    )
+                  )}
               {formError && <div className="form-error">{formError}</div>}
               <div className="form-actions">
-                <button type="submit" className="viewall-edit-btn" >Create</button>
+                <button type="submit" className="viewall-edit-btn" >{editRow ? "Update" : "Create"}</button>
                 <button type="button" className="viewall-delete-btn" onClick={handleCloseModal}>Cancel</button>
               </div>
             </form>
@@ -192,6 +226,7 @@ useEffect(() => {
             </tr>
           </thead>
           <tbody>
+            {console.log(data, "data")}
             {data.map((row, idx) => (
               <tr key={row.id || idx}>
                 {columns.map((key) => (
@@ -213,7 +248,7 @@ useEffect(() => {
                   </td>
                 ))}
                 <td>
-                  <button className="viewall-edit-btn">Edit</button>
+                  <button className="viewall-edit-btn" onClick={() => handleOpenEditModal(row)}>Edit</button>
                   <button className="viewall-delete-btn">Delete</button>
                 </td>
               </tr>

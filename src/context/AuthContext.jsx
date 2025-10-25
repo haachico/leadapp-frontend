@@ -1,12 +1,32 @@
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+
+
+const getUserFromStorage = () => {
+	try {
+		const userStr = localStorage.getItem("authUser");
+		return userStr ? JSON.parse(userStr) : null;
+	} catch {
+		return null;
+	}
+};
 
 const AuthContext = createContext();
 
+
 export const AuthProvider = ({ children }) => {
-	const [isAuthenticated, setIsAuthenticated] = useState(false);
-	const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
+		const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("authToken"));
+		const [user, setUser] = useState(getUserFromStorage());
+		const [token, setToken] = useState(localStorage.getItem("authToken") || null);
+
+		// Keep user in localStorage in sync
+		useEffect(() => {
+			if (user) {
+				localStorage.setItem("authUser", JSON.stringify(user));
+			} else {
+				localStorage.removeItem("authUser");
+			}
+		}, [user]);
 
 	// const login = (userData) => {
 	// 	setIsAuthenticated(true);
