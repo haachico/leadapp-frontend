@@ -1,3 +1,17 @@
+@media (max-width: 700px) {
+  .dashboard-container {
+    flex-direction: column;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 1.2rem;
+    align-items: stretch;
+    padding: 0 0.5rem;
+  }
+  .dashboard-card {
+    margin-top: 1.2rem;
+    padding: 1.2rem 1rem;
+  }
+}
 .dashboard-container {
   display: flex;
   gap: 2rem;

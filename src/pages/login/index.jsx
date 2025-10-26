@@ -9,8 +9,10 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  const [loginError, setLoginError] = useState("");
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoginError("");
     try {
       const response = await fetch("http://localhost:8081/api/login", {
         method: "POST",
@@ -19,9 +21,7 @@ const Login = () => {
         },
         body: JSON.stringify({ email, password })
       });
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+    
       const data = await response.json();
 
       if (data.status === "success") {
@@ -31,9 +31,11 @@ const Login = () => {
         localStorage.setItem("authUser", JSON.stringify(data.user));
         setToken(data.token);
         navigate("/", { replace: true });
+      } else {
+        setLoginError(data.message || "Invalid email or password.");
       }
     } catch (error) {
-      console.error("Login failed:", error);
+      setLoginError("Login failed. Please try again.");
     }
   };
 
@@ -68,6 +70,9 @@ const Login = () => {
         <div className="form-actions">
           <button type="submit">Login</button>
         </div>
+        {loginError && (
+          <div className="form-error" style={{ marginTop: "0.7rem", textAlign: "center" }}>{loginError}</div>
+        )}
       </form>
     </div>
   );

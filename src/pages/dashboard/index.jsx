@@ -38,13 +38,21 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
-      {isAdmin && (
-        <Card title="Users" value={stats.total_users} icon={"👤"} onClick={() => handleCardClick("users")} />
-      )}
-      <Card title="Leads" value={stats.total_leads} icon={"📋"} onClick={() => handleCardClick("leads")} />
-      <Card title="Customers" value={stats.total_customers} icon={"💼"} onClick={() => handleCardClick("customers")} />
-    </div>
+    <>
+      <div style={{ textAlign: "center", marginTop: "2rem", marginBottom: "1.5rem" }}>
+        <h2 style={{ fontWeight: 700, fontSize: "2rem", margin: 0 }}>Dashboard</h2>
+        <div style={{ fontSize: "1.1rem", color: "#999", marginTop: "0.5rem" }}>
+          Hello, {user?.name || "User"}! Here's your current summary.
+        </div>
+      </div>
+      <div className="dashboard-container">
+        {isAdmin && (
+          <Card title="Users" value={stats.total_users} icon={"👤"} onClick={() => handleCardClick("users")} />
+        )}
+        <Card title="Leads" value={stats.total_leads} icon={"📋"} onClick={() => handleCardClick("leads")} />
+        <Card title="Customers" value={stats.total_customers} icon={"💼"} onClick={() => handleCardClick("customers")} />
+      </div>
+    </>
   );
 };
 
