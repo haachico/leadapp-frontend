@@ -55,11 +55,14 @@ const handleOpenModal = () => {
 
 const handleOpenEditModal = (row) => {
   setEditRow(row);
-  // Only include fields shown in table (columns), but skip 'id'
   const editable = {};
   Object.keys(row).forEach((key) => {
     if (columns.includes(key) && key !== "id") editable[key] = row[key];
   });
+
+  if (type === "users") {
+    editable["password"] = "";
+  }
   setForm(editable);
   setFormError("");
   setShowModal(true);
@@ -78,15 +81,18 @@ const handleFormChange = (e) => {
 
 const handleFormSubmit = async (e) => {
   e.preventDefault();
-  // Only validate fields present in the form (edit: only table fields, skip id)
-  const validateFields = editRow ? columns.filter(f => f !== "id") : FORM_FIELDS[type].map(f=>f.name);
+ 
+  let validateFields = editRow ? columns.filter(f => f !== "id") : FORM_FIELDS[type].map(f=>f.name);
+
+  if (editRow && type === "users") {
+    validateFields = [...validateFields, "password"];
+  }
   for (const field of validateFields) {
-    if (!form[field] && field !== "phone" && field !== "lead_id") { // phone is optional
+    if (!form[field] && field !== "phone" && field !== "lead_id" && field !== "password") { 
       setFormError(`${field.replace(/_/g, " ")} is required`);
       return;
     }
   }
-  // Email format validation
   if (validateFields.includes("email") && form.email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email)) {
@@ -94,13 +100,17 @@ const handleFormSubmit = async (e) => {
       return;
     }
   }
-  // Phone format validation (optional, but if present, must be 10-15 digits)
+ 
   if (validateFields.includes("phone") && form.phone) {
     const phoneRegex = /^\d{10,15}$/;
     if (!phoneRegex.test(form.phone)) {
       setFormError("Please enter a valid phone number (10-15 digits, numbers only).");
       return;
     }
+  }
+  let payload = { ...form };
+  if (editRow && type === "users" && !form.password) {
+    delete payload.password;
   }
   try {
     const url = editRow ? `${API_MAP[type]}/${editRow.id}` : API_MAP[type];
@@ -110,7 +120,7 @@ const handleFormSubmit = async (e) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) {
       const err = await res.json();
@@ -175,7 +185,7 @@ useEffect(() => {
       });
       if (!res.ok) {
         const err = await res.json();
-        alert(err.message || "Failed to delete.");
+        alert(err.messages.error || "Failed to delete.");
         return;
       }
       setData(prev => prev.filter(item => item.id !== id));
@@ -197,36 +207,52 @@ useEffect(() => {
             <h3>{editRow ? `Edit ${type.slice(0, -1).charAt(0).toUpperCase() + type.slice(1, -1)}` : `Create ${type.slice(0, -1).charAt(0).toUpperCase() + type.slice(1, -1)}`}</h3>
             <form onSubmit={handleFormSubmit} className="viewall-modal-form">
               {editRow
-                ? columns.filter(col => col !== "id").map((col) => (
-                    (type === "customers" && col === "lead_id") ? null : (
-                      <div className="form-group" key={col}>
-                        <label className="form-label">{col.replace(/_/g, " ").toUpperCase()}</label>
-                        {type === "leads" && col === "status" ? (
-                          <select
-                            name="status"
-                            value={form["status"] || ""}
-                            onChange={handleFormChange}
-                            className="form-input"
-                            required
-                          >
-                            <option value="" disabled>Select Status</option>
-                            {["New", "In-progress", "Converted", "Lost"].map(opt => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type={col === "email" ? "email" : "text"}
-                            name={col}
-                            value={form[col] || ""}
-                            onChange={handleFormChange}
-                            className="form-input"
-                            required={col !== "phone"}
-                          />
-                        )}
+                ? [
+                    ...columns.filter(col => col !== "id").map((col) => (
+                      (type === "customers" && col === "lead_id") ? null : (
+                        <div className="form-group" key={col}>
+                          <label className="form-label">{col.replace(/_/g, " ").toUpperCase()}</label>
+                          {type === "leads" && col === "status" ? (
+                            <select
+                              name="status"
+                              value={form["status"] || ""}
+                              onChange={handleFormChange}
+                              className="form-input"
+                              required
+                            >
+                              <option value="" disabled>Select Status</option>
+                              {["New", "In-progress", "Converted", "Lost"].map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type={col === "email" ? "email" : "text"}
+                              name={col}
+                              value={form[col] || ""}
+                              onChange={handleFormChange}
+                              className="form-input"
+                              required={col !== "phone"}
+                            />
+                          )}
+                        </div>
+                      )
+                    )),
+                    // Show password field for user edit
+                    (type === "users") && (
+                      <div className="form-group" key="password">
+                        <label className="form-label">Password (leave blank to keep unchanged)</label>
+                        <input
+                          type="password"
+                          name="password"
+                          value={form["password"] || ""}
+                          onChange={handleFormChange}
+                          className="form-input"
+                          autoComplete="new-password"
+                        />
                       </div>
                     )
-                  ))
+                  ]
                 : FORM_FIELDS[type].map(field =>
                     field.type === "hidden" ? (
                       <input key={field.name} type="hidden" name={field.name} value={user?.id} />
