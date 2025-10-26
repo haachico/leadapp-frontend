@@ -146,6 +146,27 @@ useEffect(() => {
   );
 
   console.log(showModal, "showModal")
+
+    const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    try {
+      const url = `${API_MAP[type]}/${id}`;
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.message || "Failed to delete.");
+        return;
+      }
+      setData(prev => prev.filter(item => item.id !== id));
+    } catch (err) {
+      alert("Failed to delete. Please try again.");
+    }
+  };
   return (
     <div className="viewall-table-container">
       <div className="viewall-table-header">
@@ -257,7 +278,7 @@ useEffect(() => {
                 ))}
                 <td>
                   <button className="viewall-edit-btn" onClick={() => handleOpenEditModal(row)}>Edit</button>
-                  <button className="viewall-delete-btn">Delete</button>
+                  <button className="viewall-delete-btn" onClick={() => handleDelete(row.id)}>Delete</button>
                 </td>
               </tr>
             ))}
