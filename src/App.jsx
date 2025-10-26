@@ -7,6 +7,7 @@ import "./index.css"
 import Login from "./pages/login";
 import Dashboard from "./pages/dashboard";
 import ViewAll from "./pages/viewAll";
+import Header from "./components/Header";
 
 // Placeholder Login and Dashboard components
 
@@ -15,6 +16,7 @@ function App() {
 
   return (
     <Router>
+        <Header />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route

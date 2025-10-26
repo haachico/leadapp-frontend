@@ -86,6 +86,22 @@ const handleFormSubmit = async (e) => {
       return;
     }
   }
+  // Email format validation
+  if (validateFields.includes("email") && form.email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+  }
+  // Phone format validation (optional, but if present, must be 10-15 digits)
+  if (validateFields.includes("phone") && form.phone) {
+    const phoneRegex = /^\d{10,15}$/;
+    if (!phoneRegex.test(form.phone)) {
+      setFormError("Please enter a valid phone number (10-15 digits, numbers only).");
+      return;
+    }
+  }
   try {
     const url = editRow ? `${API_MAP[type]}/${editRow.id}` : API_MAP[type];
     const res = await fetch(url, {
@@ -273,7 +289,7 @@ useEffect(() => {
                       ? row.status
                       : key === "phone" && (!row[key] || row[key] === "null")
                       ? "-"
-                      : key === "lead_id" ?  `Lead id: ${row[key] || "-"}` : row[key]}
+                      : key === "lead_id" ?  ` ${row[key] || "-"}` : row[key]}
                   </td>
                 ))}
                 <td>
