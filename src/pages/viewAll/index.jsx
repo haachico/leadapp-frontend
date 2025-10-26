@@ -81,7 +81,7 @@ const handleFormSubmit = async (e) => {
   // Only validate fields present in the form (edit: only table fields, skip id)
   const validateFields = editRow ? columns.filter(f => f !== "id") : FORM_FIELDS[type].map(f=>f.name);
   for (const field of validateFields) {
-    if (!form[field] && field !== "phone") { // phone is optional
+    if (!form[field] && field !== "phone" && field !== "lead_id") { // phone is optional
       setFormError(`${field.replace(/_/g, " ")} is required`);
       return;
     }
@@ -139,7 +139,7 @@ useEffect(() => {
   if (error) return <div className="viewall-error">{error}</div>;
   if (!data.length) return <div className="viewall-empty">No data found.</div>;
 
-  const HIDE_COLS = ["assigned_to", "project_id", "created_at", "updated_at", "lead_id"];
+  const HIDE_COLS = ["assigned_to", "project_id", "created_at", "updated_at"];
  
   const columns = Object.keys(data[0]).filter(
     (key) => !HIDE_COLS.includes(key)
@@ -161,17 +161,34 @@ useEffect(() => {
             <form onSubmit={handleFormSubmit} className="viewall-modal-form">
               {editRow
                 ? columns.filter(col => col !== "id").map((col) => (
-                    <div className="form-group" key={col}>
-                      <label className="form-label">{col.replace(/_/g, " ").toUpperCase()}</label>
-                      <input
-                        type={col === "email" ? "email" : "text"}
-                        name={col}
-                        value={form[col] || ""}
-                        onChange={handleFormChange}
-                        className="form-input"
-                        required={col !== "phone"}
-                      />
-                    </div>
+                    (type === "customers" && col === "lead_id") ? null : (
+                      <div className="form-group" key={col}>
+                        <label className="form-label">{col.replace(/_/g, " ").toUpperCase()}</label>
+                        {type === "leads" && col === "status" ? (
+                          <select
+                            name="status"
+                            value={form["status"] || ""}
+                            onChange={handleFormChange}
+                            className="form-input"
+                            required
+                          >
+                            <option value="" disabled>Select Status</option>
+                            {["New", "In-progress", "Converted", "Lost"].map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type={col === "email" ? "email" : "text"}
+                            name={col}
+                            value={form[col] || ""}
+                            onChange={handleFormChange}
+                            className="form-input"
+                            required={col !== "phone"}
+                          />
+                        )}
+                      </div>
+                    )
                   ))
                 : FORM_FIELDS[type].map(field =>
                     field.type === "hidden" ? (
@@ -220,7 +237,7 @@ useEffect(() => {
           <thead>
             <tr>
               {columns.map((key) => (
-                <th key={key}>{key.replace(/_/g, " ").toUpperCase()}</th>
+               key === "lead_id" ? <th key={key}>ASSOCIATED LEAD</th> : <th key={key}>{key.replace(/_/g, " ").toUpperCase()}</th>
               ))}
               <th>ACTIONS</th>
             </tr>
@@ -231,20 +248,11 @@ useEffect(() => {
               <tr key={row.id || idx}>
                 {columns.map((key) => (
                   <td key={key}>
-                    {type === "leads" && key === "status" ? (
-                      <select
-                        value={row.status}
-                        onChange={e => {
-                          const newStatus = e.target.value;
-                          setData(prev => prev.map(r => r.id === row.id ? { ...r, status: newStatus } : r));
-                        }}
-                        className="viewall-status-dropdown"
-                      >
-                        {["New", "In-progress", "Converted", "Lost"].map(opt => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                    ) : key === "phone" && (!row[key] || row[key] === "null") ? "-" : row[key]}
+                    {type === "leads" && key === "status"
+                      ? row.status
+                      : key === "phone" && (!row[key] || row[key] === "null")
+                      ? "-"
+                      : key === "lead_id" ?  `Lead id: ${row[key] || "-"}` : row[key]}
                   </td>
                 ))}
                 <td>
