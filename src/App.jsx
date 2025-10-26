@@ -8,6 +8,7 @@ import Login from "./pages/login";
 import Dashboard from "./pages/dashboard";
 import ViewAll from "./pages/viewAll";
 import Header from "./components/Header";
+import ErrorPage from "./pages/ErrorPage";
 
 // Placeholder Login and Dashboard components
 
@@ -30,6 +31,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="/view-all" element={<ViewAll />} />
           {/* Add more protected routes here */}
+        <Route path="*" element={<ErrorPage />} />
         </Route>
       </Routes>
     </Router>
