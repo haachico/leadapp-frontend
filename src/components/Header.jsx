@@ -35,7 +35,25 @@ const Header = () => {
     </h1>
 
    {user && <nav style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-      <span>Hi, {user?.name}</span>
+      <span
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          background: "#eebbc3",
+          color: "#232946",
+          fontWeight: 700,
+          fontSize: "1.1rem",
+          textTransform: "uppercase",
+          marginRight: "0.3rem"
+        }}
+        title={user?.name}
+      >
+        {user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0,2) : "U"}
+      </span>
       <span
         title="Logout"
         onClick={handleLogout}

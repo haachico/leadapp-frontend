@@ -65,4 +65,11 @@
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
+
 }
+/* 
+.form-actions button {
+  background-color: #646cff;
+  color: #fff;
+  border: none;
+} */
